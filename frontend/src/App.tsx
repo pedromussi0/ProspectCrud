@@ -1,20 +1,21 @@
-import { useState } from 'react'
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 
-function App() {
-  const [count, setCount] = useState(0)
-
+export const App: React.FC = () => {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100">
-      <h1 className="text-4xl font-bold mb-4">Vite + React + TS + Tailwind</h1>
-      <button
-        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-        onClick={() => setCount((count) => count + 1)}
-      >
-        Count is {count}
-      </button>
-    </div>
-  )
-}
+    <Router>
+      <div className="app">
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </div>
+    </Router>
+  );
+};
 
-export default App
+export default App;
 
