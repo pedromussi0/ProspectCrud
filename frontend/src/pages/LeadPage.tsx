@@ -1,8 +1,8 @@
 import React from 'react';
-import { Navbar } from '../components/Navbar';
-import { LeadTable } from '../components/LeadTable';
+import  Navbar  from '../components/Navbar';
+import LeadTable  from '../components/LeadTable';
 
-export const LeadPage: React.FC = () => {
+export default function LeadPage() {
   return (
     <div className="min-h-screen bg-gray-100">
       <Navbar />

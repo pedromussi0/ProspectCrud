@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create an axios instance with default config
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: 'localhost:8000/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -24,6 +24,12 @@ export interface LoginCredentials {
   password: string;
 }
 
+export interface RegistrationData {
+  username: string;
+  email: string;
+  password: string;
+}
+
 // Auth API
 export const authApi = {
   login: async (credentials: LoginCredentials) => {
@@ -38,6 +44,11 @@ export const authApi = {
   
   getCurrentUser: async () => {
     const response = await api.get('/auth/user/');
+    return response.data;
+  },
+  
+  register: async (data: RegistrationData) => {
+    const response = await api.post('/auth/register/', data);
     return response.data;
   },
 };

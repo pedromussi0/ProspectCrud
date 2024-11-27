@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Form from './ui/Form';
+import { authApi } from '../services/api';
+import axios from 'axios';
 
 interface RegistrationData {
   username: string;
@@ -29,14 +31,17 @@ export default function RegistrationForm() {
       setError("Passwords don't match");
       return;
     }
+    
     try {
-      // Implement registration logic here
-      // You might want to create a new function in your authApi for registration
-      console.log('Registration data:', formData);
-      // Redirect to login page after successful registration
+      const { confirmPassword, ...registrationData } = formData;
+      await authApi.register(registrationData);
       navigate('/login');
     } catch (err) {
-      setError('Registration failed. Please try again.');
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      } else {
+        setError('Registration failed. Please try again.');
+      }
     }
   };
 
