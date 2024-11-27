@@ -2,11 +2,37 @@ import axios from 'axios';
 
 // Create an axios instance with default config
 const api = axios.create({
-  baseURL: 'localhost:8000/api',
+  baseURL: 'http://localhost:8000/api',
   headers: {
     'Content-Type': 'application/json',
   },
   withCredentials: true, // Important for session-based auth
+});
+
+// Function to get CSRF token from cookie
+function getCsrfToken() {
+  const name = 'csrftoken';
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+// Add request interceptor to include CSRF token
+api.interceptors.request.use((config) => {
+  // Only add CSRF token for non-GET requests
+  if (config.method !== 'get') {
+    config.headers['X-CSRFToken'] = getCsrfToken();
+  }
+  return config;
 });
 
 // Types
@@ -91,11 +117,11 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // Handle unauthorized access
-      // You might want to redirect to login page or refresh token
       window.location.href = '/login';
     }
     return Promise.reject(error);
   }
 );
+
 export default api;
 

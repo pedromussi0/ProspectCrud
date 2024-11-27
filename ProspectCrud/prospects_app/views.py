@@ -2,11 +2,15 @@ from django.shortcuts import render
 from rest_framework import viewsets, generics, permissions, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.contrib.auth import login, logout
+from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from django.middleware.csrf import get_token
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from django.views.decorators.csrf import ensure_csrf_cookie
 from .models import Lead
 from .serializers import LeadSerializer, UserSerializer
 
@@ -28,19 +32,42 @@ class LeadRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = LeadSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-class LoginView(APIView):
-    def post(self, request):
-        form = AuthenticationForm(data=request.data)
-        if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            return Response({"detail": "Successfully logged in."})
-        return Response(form.errors, status=400)
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@ensure_csrf_cookie
+def login_view(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+    user = authenticate(username=username, password=password)
+    if user is not None:
+        login(request, user)
+        return Response({'detail': 'Successfully logged in.'})
+    else:
+        return Response(
+            {'detail': 'Invalid credentials.'},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
 
-class LogoutView(APIView):
-    def post(self, request):
-        logout(request)
-        return Response({"detail": "Successfully logged out."})
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def logout_view(request):
+    logout(request)
+    return Response({'detail': 'Successfully logged out.'})
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+@ensure_csrf_cookie
+def get_csrf_token(request):
+    return Response({'csrfToken': get_token(request)})
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user(request):
+    return Response({
+        'id': request.user.id,
+        'username': request.user.username,
+        'email': request.user.email
+    })
 
 class UserView(APIView):
     permission_classes = [permissions.IsAuthenticated]

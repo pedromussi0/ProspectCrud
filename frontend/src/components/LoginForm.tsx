@@ -1,68 +1,62 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authApi, LoginCredentials } from '../services/api';
-import Form from './ui/Form';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function LoginForm() {
-  const [credentials, setCredentials] = useState<LoginCredentials>({
-    username: '',
-    password: '',
-  });
-  const [error, setError] = useState<string | null>(null);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCredentials({ ...credentials, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await authApi.login(credentials);
-      // Redirect to dashboard or home page after successful login
-      navigate('/dashboard');
+      await login(username, password);
+      navigate('/');
     } catch (err) {
-      setError('Invalid username or password');
+      setError('Invalid credentials');
     }
   };
 
   return (
-    <Form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {error && <div className="text-red-500">{error}</div>}
       <div>
-        <label htmlFor="username" className="label">
-          <span className="label-text">Username</span>
+        <label htmlFor="username" className="block text-sm font-medium">
+          Username
         </label>
         <input
           type="text"
           id="username"
-          name="username"
-          value={credentials.username}
-          onChange={handleChange}
-          className="input input-bordered w-full"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
           required
         />
       </div>
       <div>
-        <label htmlFor="password" className="label">
-          <span className="label-text">Password</span>
+        <label htmlFor="password" className="block text-sm font-medium">
+          Password
         </label>
         <input
           type="password"
           id="password"
-          name="password"
-          value={credentials.password}
-          onChange={handleChange}
-          className="input input-bordered w-full"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
           required
         />
       </div>
-      {error && <p className="text-error">{error}</p>}
-      <button type="submit" className="btn btn-primary w-full">
+      <button
+        type="submit"
+        className="w-full bg-blue-500 text-white rounded-md py-2 hover:bg-blue-600"
+      >
         Login
       </button>
-    </Form>
+    </form>
   );
-};
+}
 
 
 

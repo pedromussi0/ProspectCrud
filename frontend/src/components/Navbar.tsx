@@ -1,13 +1,14 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { authApi } from '../services/api';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Navbar() {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
   const handleLogout = async () => {
     try {
-      await authApi.logout();
-      // Redirect to login page or update app state
-      window.location.href = '/login';
+      await logout();
+      navigate('/login');
     } catch (error) {
       console.error('Error logging out:', error);
     }
